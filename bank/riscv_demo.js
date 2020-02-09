@@ -69,14 +69,14 @@ function assert(condition, msg = 'assert failed!') {
 
 async function main() {
     const erc20_bin = fs.readFileSync("./bin/erc20.bin");
-    const dex_bin = fs.readFileSync("./bin/dex.bin");
+    const bank_bin = fs.readFileSync("./bin/bank.bin");
     const erc20_addr = await deploy(erc20_bin, JSON.stringify({
         method: 'init',
         name: 'bitcoin',
         symbol: 'BTC',
         supply: 1000000000,
     }), 'Binary');
-    const dex_addr = await deploy(dex_bin, '', 'Binary');
+    const bank_addr = await deploy(bank_bin, '', 'Binary');
 
     let res;
     let from_addr = account.address.slice(2);
@@ -96,36 +96,36 @@ async function main() {
     assert(!res.isError);
     assert(res.ret == '100');
 
-    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: dex_addr});
+    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: bank_addr});
     assert(!res.isError);
     assert(res.ret == '0');
-    res = await send_tx(erc20_addr, {method: 'approve', spender: dex_addr, amount: 300});
+    res = await send_tx(erc20_addr, {method: 'approve', spender: bank_addr, amount: 300});
     assert(!res.response.ret.includes('[ProtocolError]'));
-    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: dex_addr});
+    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: bank_addr});
     assert(!res.isError);
     assert(res.ret == '300');
-    res = await send_tx(dex_addr, {method: 'deposit', asset: erc20_addr, amount: 200});
+    res = await send_tx(bank_addr, {method: 'deposit', asset: erc20_addr, amount: 200});
     assert(!res.response.ret.includes('[ProtocolError]'));
-    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: dex_addr});
+    res = await query(erc20_addr, {method: 'allowances', owner: from_addr, spender: bank_addr});
     assert(!res.isError);
     assert(res.ret == '100');
-    res = await query(dex_addr, {method: 'balance_of', account: from_addr, asset: erc20_addr});
+    res = await query(bank_addr, {method: 'balance_of', account: from_addr, asset: erc20_addr});
     assert(!res.isError);
     assert(res.ret == '200');
     res = await query(erc20_addr, {method: 'balance_of', account: from_addr});
     assert(!res.isError);
     assert(res.ret == '999999700');
-    res = await send_tx(dex_addr, {method: 'withdraw', asset: erc20_addr, amount: 1});
+    res = await send_tx(bank_addr, {method: 'withdraw', asset: erc20_addr, amount: 1});
     assert(!res.response.ret.includes('[ProtocolError]'));
-    res = await query(dex_addr, {method: 'balance_of', asset: erc20_addr, account: from_addr});
+    res = await query(bank_addr, {method: 'balance_of', asset: erc20_addr, account: from_addr});
     assert(!res.isError);
     assert(res.ret == '199');
     res = await query(erc20_addr, {method: 'balance_of', account: from_addr});
     assert(!res.isError);
     assert(res.ret == '999999701');
-    res = await send_tx(dex_addr, {method: 'withdraw', asset: erc20_addr, amount: 200});
+    res = await send_tx(bank_addr, {method: 'withdraw', asset: erc20_addr, amount: 200});
     assert(res.response.ret.includes('[ProtocolError]'));
-    res = await query(dex_addr, {method: 'balance_of', asset: erc20_addr, account: from_addr});
+    res = await query(bank_addr, {method: 'balance_of', asset: erc20_addr, account: from_addr});
     assert(!res.isError);
     assert(res.ret == '199');
 }

@@ -17,7 +17,10 @@ libpvm.a:
 
 bin: libpvm.a
 	$(CC) -I$(DEPS) $(DEPS)/cJSON.h $(DEPS)/cJSON.c erc20.c $(MID)/libpvm.a $(LDFLAGS) -o $(BIN)/erc20.bin
-	$(CC) -I$(DEPS) $(DEPS)/cJSON.h $(DEPS)/cJSON.c dex.c $(MID)/libpvm.a $(LDFLAGS) -o $(BIN)/dex.bin
+	$(CC) -I$(DEPS) $(DEPS)/cJSON.h $(DEPS)/cJSON.c bank.c $(MID)/libpvm.a $(LDFLAGS) -o $(BIN)/bank.bin
 
 bin_docker:
 	$(DOCKER_BUILD) "cd /src && make bin"
+
+clear:
+	@rm -rf middle/*
