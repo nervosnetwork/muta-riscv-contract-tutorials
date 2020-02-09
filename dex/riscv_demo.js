@@ -1,16 +1,3 @@
-/**
- * run this demo with below steps:
- *
- * ```
- * $ cargo run --example muta-chain
- *
- * # in another terminal
- * $ cd built-in-services/riscv/examples/dex
- * $ yarn install
- * $ node riscv_demo.js
- * ```
- */
-
 const muta_sdk = require('muta-sdk');
 const Muta = muta_sdk.Muta;
 const fs = require('fs');
@@ -81,27 +68,15 @@ function assert(condition, msg = 'assert failed!') {
 }
 
 async function main() {
-    // deploy duktape js
-    const erc20 = fs.readFileSync("./erc20.js");
-    const dex = fs.readFileSync("./dex.js");
-    const erc20_addr = await deploy(erc20, JSON.stringify({
+    const erc20_bin = fs.readFileSync("./bin/erc20.bin");
+    const dex_bin = fs.readFileSync("./bin/dex.bin");
+    const erc20_addr = await deploy(erc20_bin, JSON.stringify({
         method: 'init',
         name: 'bitcoin',
         symbol: 'BTC',
         supply: 1000000000,
-    }), 'Duktape');
-    const dex_addr = await deploy(dex, '', 'Duktape');
-
-    // deploy binary
-    // const erc20_bin = fs.readFileSync("./bin/erc20.bin");
-    // const dex_bin = fs.readFileSync("./bin/dex.bin");
-    // const erc20_addr = await deploy(erc20_bin, JSON.stringify({
-    //     method: 'init',
-    //     name: 'bitcoin',
-    //     symbol: 'BTC',
-    //     supply: 1000000000,
-    // }), 'Binary');
-    // const dex_addr = await deploy(dex_bin, '', 'Binary');
+    }), 'Binary');
+    const dex_addr = await deploy(dex_bin, '', 'Binary');
 
     let res;
     let from_addr = account.address.slice(2);
