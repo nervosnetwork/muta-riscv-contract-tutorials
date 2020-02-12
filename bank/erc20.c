@@ -9,10 +9,9 @@
 
 pvm_bytes_t _load_args() {
   uint8_t buf[2048];
-  uint64_t args_size;
 
-  pvm_load_args(buf, &args_size);
-  return pvm_bytes_nbytes(buf, args_size);
+  uint64_t size = pvm_load_args(buf);
+  return pvm_bytes_nbytes(buf, size);
 }
 
 pvm_bytes_t _balance_key(pvm_bytes_t *account) {
@@ -24,8 +23,9 @@ pvm_bytes_t _balance_key(pvm_bytes_t *account) {
 
 pvm_bytes_t _caller() {
   uint8_t buf[40];
-  pvm_caller(buf);
-  return pvm_bytes_nbytes(buf, 40);
+  uint64_t size = pvm_caller(buf);
+
+  return pvm_bytes_nbytes(buf, size);
 }
 
 pvm_u64_t total_supply() {
