@@ -235,7 +235,7 @@ int pvm_bytes_append_nbytes(pvm_bytes_t *dest, const void *ptr, uint64_t size) {
   return pvm_bytes_append(dest, &src_buf);
 }
 
-int pvm_set(pvm_bytes_t *key, pvm_bytes_t *val) {
+void pvm_set(pvm_bytes_t *key, pvm_bytes_t *val) {
   pvm_assert_not_null(key, "set key null");
   pvm_assert_not_empty(key, "set key empty");
   pvm_assert_not_null(val, "set val null");
@@ -246,7 +246,7 @@ int pvm_set(pvm_bytes_t *key, pvm_bytes_t *val) {
   const void *val_ptr = val->UB.ptr;
   size_t val_len = UsefulOutBuf_GetEndPosition(val);
 
-  return pvm_set_storage(key_ptr, key_len, val_ptr, val_len);
+  pvm_set_storage(key_ptr, key_len, val_ptr, val_len);
 }
 
 uint64_t pvm_get_size(pvm_bytes_t *key) {
@@ -256,12 +256,10 @@ uint64_t pvm_get_size(pvm_bytes_t *key) {
   const void *key_ptr = key->UB.ptr;
   size_t key_len = UsefulOutBuf_GetEndPosition(key);
 
-  uint64_t val_size = 0;
-  pvm_get_storage(key_ptr, key_len, NULL, &val_size);
-  return val_size;
+  return pvm_get_storage(key_ptr, key_len, NULL);
 }
 
-int pvm_get(pvm_bytes_t *key, pvm_bytes_t *val) {
+void pvm_get(pvm_bytes_t *key, pvm_bytes_t *val) {
   pvm_assert_not_null(key, "get key null");
   pvm_assert_not_empty(key, "get key empty");
   pvm_assert_not_null(val, "get val null");
@@ -269,7 +267,7 @@ int pvm_get(pvm_bytes_t *key, pvm_bytes_t *val) {
   uint64_t val_size = pvm_get_size(key);
   if (val_size == 0) {
     UsefulOutBuf_Reset(val);
-    return PVM_SUCCESS;
+    return;
   }
 
   if (!UsefulOutBuf_WillItFit(val, val_size)) {
@@ -280,8 +278,7 @@ int pvm_get(pvm_bytes_t *key, pvm_bytes_t *val) {
 
   const void *key_ptr = key->UB.ptr;
   size_t key_len = UsefulOutBuf_GetEndPosition(key);
-
-  return pvm_get_storage(key_ptr, key_len, val->UB.ptr, &val->data_len);
+  val->data_len = pvm_get_storage(key_ptr, key_len, val->UB.ptr);
 }
 
 uint64_t pvm_get_u64(pvm_bytes_t *key) {
@@ -297,9 +294,9 @@ uint64_t pvm_get_u64(pvm_bytes_t *key) {
   return pvm_bytes_get_u64(&u64_to_get);
 }
 
-int pvm_set_u64(pvm_bytes_t *key, uint64_t val) {
+void pvm_set_u64(pvm_bytes_t *key, uint64_t val) {
   pvm_bytes_t v = pvm_bytes_u64(val);
-  return pvm_set(key, &v);
+  pvm_set(key, &v);
 }
 
 const char *pvm_get_str(pvm_bytes_t *key) {
@@ -313,12 +310,12 @@ const char *pvm_get_str(pvm_bytes_t *key) {
   return pvm_bytes_get_str(&val);
 }
 
-int pvm_set_str(pvm_bytes_t *key, const char *str) {
+void pvm_set_str(pvm_bytes_t *key, const char *str) {
   pvm_bytes_t v = pvm_bytes_str(str);
-  return pvm_set(key, &v);
+  pvm_set(key, &v);
 }
 
-int pvm_set_bool(pvm_bytes_t *key, uint8_t flag) {
+void pvm_set_bool(pvm_bytes_t *key, uint8_t flag) {
   pvm_bytes_stack(bool_to_set, 1);
 
   if (flag != 0) {
@@ -327,7 +324,7 @@ int pvm_set_bool(pvm_bytes_t *key, uint8_t flag) {
     UsefulOutBuf_AppendByte(&bool_to_set, 0);
   }
 
-  return pvm_set(key, &bool_to_set);
+  pvm_set(key, &bool_to_set);
 }
 
 int pvm_get_bool(pvm_bytes_t *key) {
@@ -359,7 +356,7 @@ pvm_u64_t pvm_u64_zero() { return pvm_u64_new(0); }
 
 void pvm_u64_dump(pvm_u64_t u64) {
     char buf[24];
-    snprintf(buf, 24, "%lu", u64);
+    snprintf(buf, 24, "%lu", pvm_u64_raw(u64));
     pvm_debug(buf);
 }
 

@@ -9,22 +9,23 @@
 
 pvm_bytes_t _load_args() {
   uint8_t buf[2048];
-  uint64_t args_size;
 
-  pvm_load_args(buf, &args_size);
-  return pvm_bytes_nbytes(buf, args_size);
+  uint64_t size = pvm_load_args(buf);
+  return pvm_bytes_nbytes(buf, size);
 }
 
 pvm_bytes_t _caller() {
   uint8_t buf[40];
-  pvm_caller(buf);
-  return pvm_bytes_nbytes(buf, 40);
+  uint64_t size = pvm_caller(buf);
+
+  return pvm_bytes_nbytes(buf, size);
 }
 
 pvm_bytes_t _contract_address() {
   uint8_t buf[40];
-  pvm_address(buf);
-  return pvm_bytes_nbytes(buf, 40);
+  uint64_t size = pvm_address(buf);
+
+  return pvm_bytes_nbytes(buf, size);
 }
 
 pvm_bytes_t _balance_key(pvm_bytes_t *asset, pvm_bytes_t *account) {
@@ -51,7 +52,7 @@ void deposit(pvm_bytes_t *asset, pvm_u64_t amount) {
   pvm_bytes_t recipient = _contract_address();
 
   char amount_str[20];
-  sprintf(amount_str, "%d", amount);
+  sprintf(amount_str, "%lu", pvm_u64_raw(amount));
 
   cJSON *args = cJSON_CreateObject();
   pvm_assert(NULL != cJSON_AddStringToObject(args, "method", "transfer_from"),
@@ -70,7 +71,7 @@ void deposit(pvm_bytes_t *asset, pvm_u64_t amount) {
   pvm_assert(NULL != json_args, "deposit json args");
 
   pvm_contract_call(pvm_bytes_raw_ptr(asset), (const uint8_t *)json_args,
-                    strlen(json_args), NULL, NULL);
+                    strlen(json_args), NULL);
 
   pvm_u64_t amount_before = _balance(asset, &caller);
   pvm_u64_t amount_after = pvm_u64_add(amount_before, amount);
@@ -96,7 +97,7 @@ void withdraw(pvm_bytes_t *asset, pvm_u64_t amount) {
 
   _set_balance(asset, &caller, amount_after);
   pvm_contract_call(pvm_bytes_raw_ptr(asset), (const uint8_t *)json_args,
-                    strlen(json_args), NULL, NULL);
+                    strlen(json_args), NULL);
 }
 
 pvm_u64_t balance_of(pvm_bytes_t *asset, pvm_bytes_t *account) {
