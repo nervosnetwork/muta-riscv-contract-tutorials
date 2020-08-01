@@ -13,20 +13,20 @@
  * @return size of decoded data
  */
 int pvm_hex2bin(char *s, char *buf) {
-  int i, n = 0;
-  for (i = 0; s[i]; i += 2) {
-    int c = tolower(s[i]);
-    if (c >= 'a' && c <= 'f')
-      buf[n] = c - 'a' + 10;
-    else
-      buf[n] = c - '0';
-    if (s[i + 1] >= 'a' && s[i + 1] <= 'f')
-      buf[n] = (buf[n] << 4) | (s[i + 1] - 'a' + 10);
-    else
-      buf[n] = (buf[n] << 4) | (s[i + 1] - '0');
-    ++n;
-  }
-  return n;
+    int i, n = 0;
+    for (i = 0; s[i]; i += 2) {
+        int c = tolower(s[i]);
+        if (c >= 'a' && c <= 'f')
+            buf[n] = c - 'a' + 10;
+        else
+            buf[n] = c - '0';
+        if (s[i + 1] >= 'a' && s[i + 1] <= 'f')
+            buf[n] = (buf[n] << 4) | (s[i + 1] - 'a' + 10);
+        else
+            buf[n] = (buf[n] << 4) | (s[i + 1] - '0');
+        ++n;
+    }
+    return n;
 }
 
 /**
@@ -40,12 +40,12 @@ int pvm_hex2bin(char *s, char *buf) {
  * @return Void
  */
 void pvm_bin2hex(uint8_t *bin, uint8_t len, char *out) {
-  uint8_t i;
-  for (i = 0; i < len; i++) {
-    out[i * 2] = "0123456789abcdef"[bin[i] >> 4];
-    out[i * 2 + 1] = "0123456789abcdef"[bin[i] & 0x0F];
-  }
-  out[len * 2] = '\0';
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        out[i * 2] = "0123456789abcdef"[bin[i] >> 4];
+        out[i * 2 + 1] = "0123456789abcdef"[bin[i] & 0x0F];
+    }
+    out[len * 2] = '\0';
 }
 
 /**
@@ -58,8 +58,8 @@ void pvm_bin2hex(uint8_t *bin, uint8_t len, char *out) {
  * @return Void
  */
 void pvm_ret_str(const char *s) {
-  uint8_t *buffer = (uint8_t *)s;
-  pvm_ret((uint8_t *)s, strlen(buffer));
+    uint8_t *buffer = (uint8_t *)s;
+    pvm_ret((uint8_t *)s, strlen(buffer));
 }
 
 /**
@@ -83,8 +83,8 @@ void pvm_ret_u64(uint64_t n) { pvm_ret((uint8_t *)&n, 8); }
  * @return Void
  */
 void pvm_ret_u64_str(uint64_t n) {
-  char buf[24];
+    char buf[24];
 
-  size_t size = snprintf(buf, 24, "%lu", n);
-  pvm_ret((uint8_t *)buf, size);
+    size_t size = snprintf(buf, 24, "%lu", n);
+    pvm_ret((uint8_t *)buf, size);
 }
