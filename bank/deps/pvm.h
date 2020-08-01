@@ -14,17 +14,17 @@
 
 static inline long __internal_syscall(long n, long _a0, long _a1, long _a2,
                                       long _a3, long _a4, long _a5) {
-  register long a0 asm("a0") = _a0;
-  register long a1 asm("a1") = _a1;
-  register long a2 asm("a2") = _a2;
-  register long a3 asm("a3") = _a3;
-  register long a4 asm("a4") = _a4;
-  register long a5 asm("a5") = _a5;
-  register long syscall_id asm("a7") = n;
-  asm volatile("scall"
-               : "+r"(a0)
-               : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(syscall_id));
-  return a0;
+    register long a0 asm("a0") = _a0;
+    register long a1 asm("a1") = _a1;
+    register long a2 asm("a2") = _a2;
+    register long a3 asm("a3") = _a3;
+    register long a4 asm("a4") = _a4;
+    register long a5 asm("a5") = _a5;
+    register long syscall_id asm("a7") = n;
+    asm volatile("scall"
+    : "+r"(a0)
+    : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(syscall_id));
+    return a0;
 }
 
 #define syscall(n, a, b, c, d, e, f)                                           \
@@ -54,6 +54,8 @@ static inline long __internal_syscall(long n, long _a0, long _a1, long _a2,
 #define SYSCODE_SET_STORAGE 4001
 #define SYSCODE_CONTRACT_CALL 4002
 #define SYSCODE_SERVICE_CALL 4003
+#define SYSCODE_SERVICE_WRITE 4004
+#define SYSCODE_SERVICE_READ 4005
 
 /**
  * @brief print debug message
@@ -195,7 +197,7 @@ uint64_t pvm_caller(uint8_t *addr);
  *
  * @code{.c}
  *    uint8_t addr[50];
- *    pvm_adress(addr);
+ *    pvm_address(addr);
  * @endcode
  * @param addr[out]: pointer to buffer for loaded contract address to write
  * @return size of contract address in bytes
@@ -263,14 +265,17 @@ uint64_t pvm_timestamp();
  * Function pvm_emit_event emit event message string. Message is UTF-8 encoded.
  *
  * @code{.c}
- *   const char *msg = "{ \"msg\": \"test event\" }";
- *   pvm_emit_event((uint8_t *)msg, strlen(msg));
+ *   const char *name = "event_name"
+ *   const char *event = "{ \"msg\": \"test event\" }";
+ *   pvm_emit_event((uint8_t *)name, strlen(name), (uint8_t *)event, strlen(event));
  * @endcode
- * @param msg[in]: a pointer to msg to emit
- * @throw IO(InvalidInput) if msg pointer is null
+ * @param name[in]: a pointer to event's name to emit
+ * @param event[in]: a pointer to event's body to emit
+ * @throw IO(InvalidInput) if name pointer is null
+ * @throw IO(InvalidInput) if event pointer is null
  * @throw IO(InvalidData) if msg is invalid utf-8 string
  */
-void pvm_emit_event(const uint8_t *msg, uint64_t msg_sz);
+void pvm_emit_event(const uint8_t *name_ptr, uint64_t name_sz, uint8_t *event_ptr, uint64_t event_sz);
 
 /**
  * @brief load transaction hash
@@ -292,7 +297,7 @@ uint64_t pvm_tx_hash(uint8_t *tx_hash);
  * Function pvm_nonce loads transaction nonce hash.
  *
  * @code{.c}
- *   uint8_t *nonce = malloc(pvm_nonce(NULL));
+ *   uint8_t *nonce = malloc(pvm_tx_nonce(NULL));
  *   pvm_tx_nonce(nonce);
  * @endcode
  * @param nonce[out]: pointer to buffer for loaded nonce to write
@@ -396,6 +401,28 @@ uint64_t pvm_contract_call(const uint8_t *addr, const uint8_t *args,
  * @throw IO(Other) if service call failure
  */
 uint64_t pvm_service_call(const char *service, const char *method,
+                          const uint8_t *payload, uint64_t payload_size,
+                          uint8_t *ret);
+
+/**
+ * @brief call a service write method
+ *
+ * Function pvm_service_write invokes a service write method.
+ * The args and returns are the same with pvm_service_call.
+ *
+ */
+uint64_t pvm_service_write(const char *service, const char *method,
+                           const uint8_t *payload, uint64_t payload_size,
+                           uint8_t *ret);
+
+/**
+ * @brief call a service read method
+ *
+ * Function pvm_service_read invokes a service read method.
+ * The args and returns are the same with pvm_service_call.
+ *
+ */
+uint64_t pvm_service_read(const char *service, const char *method,
                           const uint8_t *payload, uint64_t payload_size,
                           uint8_t *ret);
 
